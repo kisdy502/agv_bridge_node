@@ -9,6 +9,10 @@ struct PositionUpdate :public BaseMessage{
     // std::string timestamp;
     double x = 0.0;
     double y = 0.0;
+    double qx = 0.0;  // 四元数 x
+    double qy = 0.0;  // 四元数 y
+    double qz = 0.0;  // 四元数 z
+    double qw = 1.0;  // 四元数 w（默认单位四元数）
     double theta = 0.0;
     double vx = 0.0;
     double vy = 0.0;

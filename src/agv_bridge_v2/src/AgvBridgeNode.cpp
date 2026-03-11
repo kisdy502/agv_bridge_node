@@ -157,20 +157,16 @@ namespace agv_bridge
         auto qos = rclcpp::QoS(10);
 
         // 发布目标点
-        goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
-            "goal_pose", qos);
+        goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("goal_pose", qos);
 
         // 发布初始位置
-        initial_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
-            "initialpose", qos);
+        initial_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("initialpose", qos);
 
         // 发布速度命令
-        cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
-            "cmd_vel", qos);
+        cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", qos);
 
         // 发布AGV控制
-        agv_control_pub_ = this->create_publisher<std_msgs::msg::String>(
-            "agv_control", qos);
+        agv_control_pub_ = this->create_publisher<std_msgs::msg::String>("agv_control", qos);
     }
 
     void AgvBridgeNode::create_timers()
@@ -217,26 +213,6 @@ namespace agv_bridge
         std::lock_guard<std::mutex> lock(mutex_);
         current_vel_ = msg->twist.twist;
     }
-
-    // void AgvBridgeNode::amcl_pose_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
-    // {
-    //     auto currentTime = this->now();
-    //     auto elapsed = (currentTime - lastPrintAmlcTime).seconds();
-
-    //     const auto &pose = msg->pose.pose;
-    //     double yaw = TransformUtils::quaternion_to_yaw(pose.orientation);
-
-    //     if (elapsed >= 5.0) // 每5秒次打印一次
-    //     {
-    //         RCLCPP_INFO(this->get_logger(),
-    //                     "AMCL定位 (map坐标系) : 位置(%.3f, %.3f, %.3f)", pose.position.x, pose.position.y, yaw);
-    //         lastPrintAmlcTime = currentTime;
-    //     }
-
-    //     std::lock_guard<std::mutex> lock(mutex_);
-    //     robot_last_pose_ = pose; // 保存 map 坐标系下的真实位姿
-    //     robotPoseInited = true;
-    // }
 
     void AgvBridgeNode::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
     {
@@ -373,6 +349,12 @@ namespace agv_bridge
         update.timestamp = get_current_timestamp_ms();
         update.x = current_pose.position.x;
         update.y = current_pose.position.y;
+        // 填充四元数
+        update.qx = current_pose.orientation.x;
+        update.qy = current_pose.orientation.y;
+        update.qz = current_pose.orientation.z;
+        update.qw = current_pose.orientation.w;
+
         update.theta = yaw;
         // 如果需要速度，可以从 current_vel_ 获取（也在 mutex_ 保护下）
         update.vx = current_vel_.linear.x;
@@ -443,30 +425,16 @@ namespace agv_bridge
 
         if (elapsed > 30)
         {
+            lastPrintPoseInitTime = current_time;
             if (current_initialized_state)
             {
-                RCLCPP_INFO(this->get_logger(), "✅ 位置初始化完成，导航系统已就绪,间隔时间 %.2f 秒", elapsed);
+                auto initial_pose = localization_monitor_->getCurrentPose().value();
+                RCLCPP_INFO(this->get_logger(), "✅ 位置初始化完成，导航系统已就绪,间隔时间 %.2f 秒,位置: (%.2f, %.2f)", elapsed, initial_pose.position.x, initial_pose.position.y);
             }
             else
             {
                 RCLCPP_WARN(this->get_logger(), "❌ 位置未初始化，请设置初始位置");
             }
-        }
-
-        const bool robotPoseInited = localization_monitor_->isInitialized();
-        // 初始化位置
-        geometry_msgs::msg::Pose initial_pose;
-        if (localization_monitor_->getRobotPose(initial_pose))
-        {
-            if (elapsed > 30)
-            {
-                lastPrintPoseInitTime = current_time;
-                RCLCPP_INFO(this->get_logger(), "从 TF 获取初始位姿: (%.2f, %.2f)", initial_pose.position.x, initial_pose.position.y);
-            }
-        }
-        else
-        {
-            RCLCPP_WARN(this->get_logger(), "无法获取初始位姿，等待后续更新...");
         }
     }
 

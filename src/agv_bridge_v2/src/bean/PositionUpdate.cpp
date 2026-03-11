@@ -5,11 +5,9 @@ void to_json(nlohmann::json &j, const PositionUpdate &p)
     nlohmann::json base = static_cast<const BaseMessage &>(p);
     // 然后添加子类字段
     j = base;
-    j.update({
-        {"agv_id", p.agv_id},
-        // {"timestamp", p.timestamp},
-        {"position", {{"x", p.x}, {"y", p.y}, {"theta", p.theta}}},
-        {"velocity", {{"vx", p.vx}, {"vy", p.vy}, {"omega", p.omega}}}});
+    j.update({{"agv_id", p.agv_id},
+              {"position", {{"x", p.x}, {"y", p.y}, {"qx", p.qx}, {"qy", p.qy}, {"qz", p.qz}, {"qw", p.qw}, {"theta", p.theta}}},
+              {"velocity", {{"vx", p.vx}, {"vy", p.vy}, {"omega", p.omega}}}});
 }
 
 void from_json(const nlohmann::json &j, PositionUpdate &p)
@@ -22,6 +20,10 @@ void from_json(const nlohmann::json &j, PositionUpdate &p)
     auto pos = j.at("position");
     pos.at("x").get_to(p.x);
     pos.at("y").get_to(p.y);
+    pos.at("qx").get_to(p.qx);
+    pos.at("qy").get_to(p.qy);
+    pos.at("qz").get_to(p.qz);
+    pos.at("qw").get_to(p.qw);
     pos.at("theta").get_to(p.theta);
     auto vel = j.at("velocity");
     vel.at("vx").get_to(p.vx);

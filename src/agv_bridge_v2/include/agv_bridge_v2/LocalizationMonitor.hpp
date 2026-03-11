@@ -34,7 +34,7 @@ namespace agv_bridge
             const std::string &frame,
             const rclcpp::Time &time, // 关键：使用消息时间戳
             geometry_msgs::msg::TransformStamped &transform);
-        bool getRobotPose(geometry_msgs::msg::Pose &pose);
+        // bool getRobotPose(geometry_msgs::msg::Pose &pose);
         std::optional<geometry_msgs::msg::Pose> getCurrentPose() const;
 
     private:

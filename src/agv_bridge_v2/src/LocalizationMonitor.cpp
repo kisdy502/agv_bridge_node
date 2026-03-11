@@ -320,24 +320,24 @@ namespace agv_bridge
         }
     }
 
-    bool LocalizationMonitor::getRobotPose(geometry_msgs::msg::Pose &pose)
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!is_initialized_)
-        {
-            return false;
-        }
-        geometry_msgs::msg::TransformStamped transform;
-        // 获取从 map 到 base_footprint（或 base_link）的最新变换
-        if (getTransform("base_footprint", rclcpp::Time(0), transform))
-        {
-            pose.position.x = transform.transform.translation.x;
-            pose.position.y = transform.transform.translation.y;
-            pose.orientation = transform.transform.rotation;
-            return true;
-        }
-        return false;
-    }
+    // bool LocalizationMonitor::getRobotPose(geometry_msgs::msg::Pose &pose)
+    // {
+    //     std::lock_guard<std::mutex> lock(mutex_);
+    //     if (!is_initialized_)
+    //     {
+    //         return false;
+    //     }
+    //     geometry_msgs::msg::TransformStamped transform;
+    //     // 获取从 map 到 base_footprint（或 base_link）的最新变换
+    //     if (getTransform("base_footprint", rclcpp::Time(0), transform))
+    //     {
+    //         pose.position.x = transform.transform.translation.x;
+    //         pose.position.y = transform.transform.translation.y;
+    //         pose.orientation = transform.transform.rotation;
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     std::optional<geometry_msgs::msg::Pose> LocalizationMonitor::getCurrentPose() const
     {

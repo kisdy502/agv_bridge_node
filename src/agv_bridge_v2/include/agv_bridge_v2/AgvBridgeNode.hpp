@@ -29,7 +29,6 @@
 #include "agv_bridge_v2/utils/TransformUtils.hpp"
 #include "agv_bridge_v2/LocalizationMonitor.hpp"
 #include "agv_bridge_v2/bean/Edge.hpp"
-#include "agv_bridge_v2/RobotPoseProvider.hpp"
 #include "agv_bridge_v2/bean/MoveToMessage.hpp"
 
 namespace agv_bridge
